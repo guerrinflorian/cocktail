@@ -1,118 +1,95 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MuseumApp());
+  runApp(MyApp());
 }
 
-class MuseumApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Museum',
-      theme: ThemeData(primarySwatch: Colors.brown),
-      home: Artwork(),
+      home: MyHomePage(),
     );
   }
 }
 
-class Artwork extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
   @override
-  _ArtworkState createState() => _ArtworkState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _ArtworkState extends State<Artwork> {
-  bool _isFavorite = false;
-  bool _showDescription = false;
+class _MyHomePageState extends State<MyHomePage> {
+  List<int> _counterList = [];
+  int _counter = 1;
 
-  void _toggleFavorite() {
-    setState(() {
-      _isFavorite = !_isFavorite;
-    });
+  bool _isPrime(int number) {
+    if (number < 2) return false;
+    for (int i = 2; i <= number / 2; i++) {
+      if (number % i == 0) return false;
+    }
+    return true;
   }
 
-  void _toggleDescription() {
-    setState(() {
-      _showDescription = !_showDescription;
-    });
+  String _getCounterType(int counter) {
+    if (_isPrime(counter)) {
+      return "nombre premier";
+    } else if (counter % 2 == 0) {
+      return "pair";
+    } else {
+      return "impair";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    String appBarTitle = _counterList.isNotEmpty
+        ? "${_counterList.last} ${_getCounterType(_counterList.last)}"
+        : "Pomme, Poire et Ananas";
     return Scaffold(
       appBar: AppBar(
-        title: Text('Museum'),
+        title: Text(appBarTitle),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              alignment: Alignment.center,
+      body: ListView.builder(
+        itemCount: _counterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          int item = _counterList[index];
+          bool isEven = item % 2 == 0;
+          String counterType = _getCounterType(item);
+          String imagePath;
+
+          if (counterType == "nombre premier") {
+            imagePath = 'assets/images/ananas.png';
+          } else if (isEven) {
+            imagePath = 'assets/images/poire.png';
+          } else {
+            imagePath = 'assets/images/pomme.png';
+          }
+
+          return Container(
+            color: isEven ? Colors.cyan : Colors.indigo,
+            padding: EdgeInsets.all(8.0),
+            margin: EdgeInsets.all(2.0),
+            child: Row(
               children: [
-                Image.asset('assets/images/Mona_Lisa.jpg'),
-                Icon(
-                  Icons.favorite,
-                  size: 100,
-                  color: _isFavorite
-                      ? Colors.red.withOpacity(1.0)
-                      : Colors.white.withOpacity(0.75),
+                Image.asset(imagePath, height: 30),
+                SizedBox(width: 8),
+                Text(
+                  '$item',
+                  style: TextStyle(color: Colors.white),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Text(
-              'Mona Lisa',
-              style: TextStyle(
-                fontFamily: 'Merriweather',
-                fontSize: 30,
-                color: Colors.brown,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Léonard De Vinci',
-              style: TextStyle(
-                fontFamily: 'Merriweather',
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown,
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.article),
-                  color: Colors.brown,
-                  onPressed: _toggleDescription,
-                ),
-                IconButton(
-                  icon: Icon(Icons.favorite),
-                  color: _isFavorite ? Colors.red : Colors.brown,
-                  onPressed: () {
-                    _toggleFavorite();
-                    if (_isFavorite) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Oeuvre ajoutée à vos favoris'),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-            if (_showDescription)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'La Joconde est une peinture à l\'huile sur panneau de bois de peuplier réalisée par Léonard de Vinci entre 1503 et 1506, ou entre 1513 et 1516, et peut-être jusqu\'à 1519, date de sa mort. Cette œuvre est exposée au musée du Louvre à Paris.',
-                  textAlign: TextAlign.justify,
-                ),
-              ),
-          ],
-        ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _counterList.add(_counter);
+            _counter++;
+          });
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
